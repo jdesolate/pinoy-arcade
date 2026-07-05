@@ -9,7 +9,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, TEXTURE_KEYS.player);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDisplaySize(PLAYER.displayWidth, PLAYER.displayHeight);
     this.setCollideWorldBounds(true);
+
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    // Body size is in unscaled texture units; divide out the display scale.
+    // Anchor the body to the bottom-center of the frame so the feet sit on the ground.
+    const bodyWidth = PLAYER.bodyWidth / this.scaleX;
+    const bodyHeight = PLAYER.bodyHeight / this.scaleY;
+    body.setSize(bodyWidth, bodyHeight, false);
+    body.setOffset((this.width - bodyWidth) / 2, this.height - bodyHeight);
 
     const keyboard = scene.input.keyboard;
     if (!keyboard) {

@@ -1,10 +1,12 @@
 import Phaser from "phaser";
-import { BALL, GAME_HEIGHT, GAME_WIDTH, GROUND_HEIGHT, SCENE_KEYS, TEXTURE_KEYS } from "../config";
+import { BALL, GAME_HEIGHT, GAME_WIDTH, GROUND_HEIGHT, PLAYER, SCENE_KEYS, TEXTURE_KEYS } from "../config";
 import { Ball } from "../objects/Ball";
+import { Enemy } from "../objects/Enemy";
 import { Player } from "../objects/Player";
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
+  private enemy!: Enemy;
   private ball!: Ball;
   private ground!: Phaser.Physics.Arcade.Image;
   private kickKey!: Phaser.Input.Keyboard.Key;
@@ -20,11 +22,24 @@ export class GameScene extends Phaser.Scene {
     this.score = 0;
     this.ballLive = false;
 
+    this.add
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TEXTURE_KEYS.background)
+      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      .setDepth(-1);
+
     const groundY = GAME_HEIGHT - GROUND_HEIGHT / 2;
     this.ground = this.physics.add.staticImage(GAME_WIDTH / 2, groundY, TEXTURE_KEYS.ground);
+    // The background art already renders its own ground, so this collider stays invisible.
+    this.ground.setVisible(false);
 
-    this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT - GROUND_HEIGHT - 40);
+    // Spawn well clear of the ground collider and let gravity settle the player onto it,
+    // rather than placing it at a fixed offset that can overlap the ground on sprite resize.
+    const spawnY = GAME_HEIGHT - GROUND_HEIGHT - PLAYER.displayHeight;
+    this.player = new Player(this, GAME_WIDTH * 0.35, spawnY);
     this.physics.add.collider(this.player, this.ground);
+
+    this.enemy = new Enemy(this, GAME_WIDTH * 0.75, spawnY);
+    this.physics.add.collider(this.enemy, this.ground);
 
     this.ball = new Ball(this, BALL.startDropX, BALL.startDropY);
     this.physics.add.collider(this.ball, this.ground, () => this.onBallGrounded());
@@ -56,9 +71,16 @@ export class GameScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.enemy.update(this.ball, this.player.x);
 
     if (Phaser.Input.Keyboard.JustDown(this.kickKey)) {
       this.tryKick();
+    }
+
+    // Safety net: the collider callback can be missed on fast bounces, so also
+    // end the run whenever the live ball is resting against the ground.
+    if (this.ballLive && this.ball.body !== null && this.ball.body.blocked.down) {
+      this.onBallGrounded();
     }
   }
 
