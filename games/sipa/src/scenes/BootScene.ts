@@ -38,7 +38,7 @@ export class BootScene extends Phaser.Scene {
   create(): void {
     this.createGroundTexture();
     this.createAnimations();
-    this.scene.start(SCENE_KEYS.game);
+    this.scene.start(SCENE_KEYS.menu);
   }
 
   private createAnimations(): void {

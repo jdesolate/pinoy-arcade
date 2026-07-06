@@ -3,6 +3,7 @@ import { COLORS, GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from "./config";
 import { BootScene } from "./scenes/BootScene";
 import { GameOverScene } from "./scenes/GameOverScene";
 import { GameScene } from "./scenes/GameScene";
+import { MenuScene } from "./scenes/MenuScene";
 
 export function createSipaGame(parent: HTMLElement): Phaser.Game {
   return new Phaser.Game({
@@ -21,6 +22,6 @@ export function createSipaGame(parent: HTMLElement): Phaser.Game {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, GameScene, GameOverScene],
+    scene: [BootScene, MenuScene, GameScene, GameOverScene],
   });
 }

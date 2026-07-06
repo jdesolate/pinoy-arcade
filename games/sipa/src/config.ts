@@ -1,3 +1,7 @@
+import Phaser from "phaser";
+
+const KC = Phaser.Input.Keyboard.KeyCodes;
+
 export const GAME_WIDTH = 800;
 export const GAME_HEIGHT = 600;
 
@@ -42,6 +46,34 @@ export const BALL = {
   startDropY: 120,
 } as const;
 
+export interface ControlScheme {
+  left: readonly number[];
+  right: readonly number[];
+  up: readonly number[];
+  kick: readonly number[];
+}
+
+// Solo play accepts both key sets; in two-player modes each side gets its own.
+export const CONTROLS = {
+  solo: { left: [KC.LEFT, KC.A], right: [KC.RIGHT, KC.D], up: [KC.UP, KC.W], kick: [KC.SPACE] },
+  p1: { left: [KC.A], right: [KC.D], up: [KC.W], kick: [KC.F] },
+  p2: { left: [KC.LEFT], right: [KC.RIGHT], up: [KC.UP], kick: [KC.SPACE] },
+} as const satisfies Record<string, ControlScheme>;
+
+export const MODES = {
+  onePlayer: "1p",
+  versus: "2p-versus",
+  coop: "2p-coop",
+} as const;
+
+export type GameMode = (typeof MODES)[keyof typeof MODES];
+
+export const VERSUS = {
+  targetScore: 5,
+  // Pause after a point before the next serve drops.
+  serveDelayMs: 900,
+} as const;
+
 export const COLORS = {
   sky: 0x7ec8e3,
   ground: 0x8b5a2b,
@@ -52,8 +84,17 @@ export const GROUND_HEIGHT = 60;
 
 export const SCENE_KEYS = {
   boot: "BootScene",
+  menu: "MenuScene",
   game: "GameScene",
   gameOver: "GameOverScene",
+} as const;
+
+export const TOUCH = {
+  buttonRadius: 44,
+  alpha: 0.35,
+  margin: 28,
+  // Extra pointers so move + jump + kick can be held at once.
+  extraPointers: 2,
 } as const;
 
 export const TEXTURE_KEYS = {

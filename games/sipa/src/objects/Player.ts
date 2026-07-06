@@ -1,16 +1,49 @@
 import Phaser from "phaser";
-import { ANIM_KEYS, PLAYER, TEXTURE_KEYS } from "../config";
+import { ANIM_KEYS, CONTROLS, PLAYER, TEXTURE_KEYS } from "../config";
+import type { ControlScheme } from "../config";
+
+export interface PlayerOptions {
+  texture: string;
+  idleAnim: string;
+  kickAnim: string;
+  controls: ControlScheme;
+  // Court limits for versus mode; omitted means full-field movement.
+  minX?: number;
+  maxX?: number;
+  startFlipX?: boolean;
+}
+
+const DEFAULT_OPTIONS: PlayerOptions = {
+  texture: TEXTURE_KEYS.playerRest,
+  idleAnim: ANIM_KEYS.playerIdle,
+  kickAnim: ANIM_KEYS.playerKick,
+  controls: CONTROLS.solo,
+};
+
+// Held-button state fed by the on-screen touch controls.
+export interface TouchState {
+  left: boolean;
+  right: boolean;
+  jump: boolean;
+}
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
-  private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  private keys: { left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key; up: Phaser.Input.Keyboard.Key };
+  readonly touchState: TouchState = { left: false, right: false, jump: false };
+  private leftKeys: Phaser.Input.Keyboard.Key[];
+  private rightKeys: Phaser.Input.Keyboard.Key[];
+  private upKeys: Phaser.Input.Keyboard.Key[];
+  private options: PlayerOptions;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, TEXTURE_KEYS.playerRest);
+  constructor(scene: Phaser.Scene, x: number, y: number, options: PlayerOptions = DEFAULT_OPTIONS) {
+    super(scene, x, y, options.texture);
+    this.options = options;
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setDisplaySize(PLAYER.displayWidth, PLAYER.displayHeight);
     this.setCollideWorldBounds(true);
+    if (options.startFlipX === true) {
+      this.setFlipX(true);
+    }
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     // Body size is in unscaled texture units; divide out the display scale.
@@ -24,27 +57,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (!keyboard) {
       throw new Error("Keyboard input is required for Sipa");
     }
-    this.cursors = keyboard.createCursorKeys();
-    this.keys = {
-      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-    };
+    this.leftKeys = options.controls.left.map((code) => keyboard.addKey(code));
+    this.rightKeys = options.controls.right.map((code) => keyboard.addKey(code));
+    this.upKeys = options.controls.up.map((code) => keyboard.addKey(code));
 
-    this.play(ANIM_KEYS.playerIdle);
+    this.play(options.idleAnim);
   }
 
   playKick(): void {
-    this.play(ANIM_KEYS.playerKick);
+    this.play(this.options.kickAnim);
     this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-      this.play(ANIM_KEYS.playerIdle);
+      this.play(this.options.idleAnim);
     });
   }
 
   update(): void {
-    const left = this.cursors.left.isDown || this.keys.left.isDown;
-    const right = this.cursors.right.isDown || this.keys.right.isDown;
-    const jump = this.cursors.up.isDown || this.keys.up.isDown;
+    const left = this.leftKeys.some((k) => k.isDown) || this.touchState.left;
+    const right = this.rightKeys.some((k) => k.isDown) || this.touchState.right;
+    const jump = this.upKeys.some((k) => k.isDown) || this.touchState.jump;
 
     if (left && !right) {
       this.setVelocityX(-PLAYER.moveSpeed);
@@ -58,6 +88,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (jump && this.body && this.body.blocked.down) {
       this.setVelocityY(PLAYER.jumpVelocity);
+    }
+
+    this.clampToCourt();
+  }
+
+  private clampToCourt(): void {
+    const { minX, maxX } = this.options;
+    if (minX !== undefined && this.x < minX) {
+      this.setX(minX);
+      this.setVelocityX(Math.max(0, this.body?.velocity.x ?? 0));
+    }
+    if (maxX !== undefined && this.x > maxX) {
+      this.setX(maxX);
+      this.setVelocityX(Math.min(0, this.body?.velocity.x ?? 0));
     }
   }
 }
