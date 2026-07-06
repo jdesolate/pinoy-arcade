@@ -4,8 +4,8 @@ export const GAME_HEIGHT = 600;
 export const GRAVITY_Y = 900;
 
 export const PLAYER = {
-  // Source art is trimmed to the character silhouette (825x905), so the frame equals the visible art.
-  displayWidth: 100,
+  // Animation frames share a per-character canvas (~396x662), so the frame equals the visible art.
+  displayWidth: 66,
   displayHeight: 110,
   // Physics body is narrower than the art so collisions feel fair against the loose silhouette.
   bodyWidth: 44,
@@ -57,17 +57,65 @@ export const SCENE_KEYS = {
 } as const;
 
 export const TEXTURE_KEYS = {
-  player: "tex-player",
-  enemy: "tex-enemy",
+  playerRest: "tex-player-rest",
+  playerBounce: "tex-player-bounce",
+  playerKick1: "tex-player-kick1",
+  playerKick2: "tex-player-kick2",
+  playerKick3: "tex-player-kick3",
+  enemyRest: "tex-enemy-rest",
+  enemyBounce: "tex-enemy-bounce",
+  enemyKick1: "tex-enemy-kick1",
+  enemyKick2: "tex-enemy-kick2",
+  enemyKick3: "tex-enemy-kick3",
   ball: "tex-ball",
   ground: "tex-ground",
   background: "tex-background",
 } as const;
 
+export const ANIM_KEYS = {
+  playerIdle: "anim-player-idle",
+  playerKick: "anim-player-kick",
+  enemyIdle: "anim-enemy-idle",
+  enemyKick: "anim-enemy-kick",
+} as const;
+
+export const ANIM = {
+  idleFrameRate: 3,
+  kickFrameRate: 18,
+} as const;
+
+export const AUDIO_KEYS = {
+  kick: "sfx-kick",
+  bgm: "bgm-game",
+  gameOver: "sfx-gameover",
+} as const;
+
+export const AUDIO = {
+  // Music is quieter than effects so it sits under the gameplay sounds.
+  bgmVolume: 0.4,
+  defaultVolume: 0.7,
+  volumeStep: 0.1,
+} as const;
+
+export const REGISTRY_KEYS = {
+  audioSettings: "audio-settings",
+} as const;
+
 // Served from the portal app's /public/games/sipa folder.
 export const ASSET_PATHS = {
-  player: "/games/sipa/player.png",
-  enemy: "/games/sipa/enemy.png",
+  playerRest: "/games/sipa/player_rest.png",
+  playerBounce: "/games/sipa/player_bounce.png",
+  playerKick1: "/games/sipa/player_kick1.png",
+  playerKick2: "/games/sipa/player_kick2.png",
+  playerKick3: "/games/sipa/player_kick3.png",
+  enemyRest: "/games/sipa/enemy_rest.png",
+  enemyBounce: "/games/sipa/enemy_bounce.png",
+  enemyKick1: "/games/sipa/enemy_kick1.png",
+  enemyKick2: "/games/sipa/enemy_kick2.png",
+  enemyKick3: "/games/sipa/enemy_kick3.png",
   ball: "/games/sipa/takyan.png",
   background: "/games/sipa/background.png",
+  kickSfx: "/games/sipa/kick.wav",
+  bgm: "/games/sipa/bgm.wav",
+  gameOverSfx: "/games/sipa/gameover.mp3",
 } as const;

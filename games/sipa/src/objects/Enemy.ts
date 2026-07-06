@@ -1,12 +1,13 @@
 import Phaser from "phaser";
-import { ENEMY, GAME_WIDTH, PLAYER, TEXTURE_KEYS } from "../config";
+import { playSfx } from "../audio";
+import { ANIM_KEYS, AUDIO_KEYS, ENEMY, GAME_WIDTH, PLAYER, TEXTURE_KEYS } from "../config";
 import type { Ball } from "./Ball";
 
 export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private lastKickAt = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, TEXTURE_KEYS.enemy);
+    super(scene, x, y, TEXTURE_KEYS.enemyRest);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setDisplaySize(PLAYER.displayWidth, PLAYER.displayHeight);
@@ -18,6 +19,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const bodyHeight = PLAYER.bodyHeight / this.scaleY;
     body.setSize(bodyWidth, bodyHeight, false);
     body.setOffset((this.width - bodyWidth) / 2, this.height - bodyHeight);
+
+    this.play(ANIM_KEYS.enemyIdle);
+  }
+
+  private playKick(): void {
+    this.play(ANIM_KEYS.enemyKick);
+    this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      this.play(ANIM_KEYS.enemyIdle);
+    });
   }
 
   update(ball: Ball, playerX: number): void {
@@ -50,6 +60,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     ball.returnKick(playerX);
+    this.playKick();
+    playSfx(this.scene, AUDIO_KEYS.kick);
     this.lastKickAt = now;
   }
 }
