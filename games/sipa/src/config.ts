@@ -86,6 +86,7 @@ export const SCENE_KEYS = {
   boot: "BootScene",
   menu: "MenuScene",
   game: "GameScene",
+  pause: "PauseScene",
   gameOver: "GameOverScene",
 } as const;
 

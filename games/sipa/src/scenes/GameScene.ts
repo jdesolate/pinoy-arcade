@@ -58,6 +58,7 @@ export class GameScene extends Phaser.Scene {
   private bgm!: Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound;
   private ballLive = false;
   private servePending = false;
+  private pauseKeys: Phaser.Input.Keyboard.Key[] = [];
 
   constructor() {
     super(SCENE_KEYS.game);
@@ -120,6 +121,10 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    if (this.pauseKeys.some((key) => Phaser.Input.Keyboard.JustDown(key))) {
+      this.pauseGame();
+    }
+
     // Safety net: the collider callback can be missed on fast bounces, so also
     // handle the ball resting against the ground.
     if (this.ball.body !== null && this.ball.body.blocked.down) {
@@ -176,6 +181,9 @@ export class GameScene extends Phaser.Scene {
       bind(CONTROLS.p1.kick, this.player);
       bind(CONTROLS.p2.kick, this.player2);
     }
+    this.pauseKeys = [Phaser.Input.Keyboard.KeyCodes.ESC, Phaser.Input.Keyboard.KeyCodes.P].map((code) =>
+      keyboard.addKey(code),
+    );
   }
 
   private createHud(): void {
@@ -202,6 +210,23 @@ export class GameScene extends Phaser.Scene {
         strokeThickness: 3,
       })
       .setOrigin(0.5);
+
+    const pauseButton = this.add
+      .text(GAME_WIDTH - 16, 104, "[ Pause ]", {
+        ...HUD_STYLE,
+        fontSize: "18px",
+        strokeThickness: 3,
+      })
+      .setOrigin(1, 0)
+      .setInteractive({ useHandCursor: true });
+    pauseButton.on(Phaser.Input.Events.GAMEOBJECT_POINTER_OVER, () => pauseButton.setColor("#ffff88"));
+    pauseButton.on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => pauseButton.setColor("#ffffff"));
+    pauseButton.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => this.pauseGame());
+  }
+
+  private pauseGame(): void {
+    this.scene.launch(SCENE_KEYS.pause);
+    this.scene.pause();
   }
 
   private initialDropX(): number {

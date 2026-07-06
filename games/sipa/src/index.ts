@@ -4,6 +4,7 @@ import { BootScene } from "./scenes/BootScene";
 import { GameOverScene } from "./scenes/GameOverScene";
 import { GameScene } from "./scenes/GameScene";
 import { MenuScene } from "./scenes/MenuScene";
+import { PauseScene } from "./scenes/PauseScene";
 
 export function createSipaGame(parent: HTMLElement): Phaser.Game {
   return new Phaser.Game({
@@ -22,6 +23,6 @@ export function createSipaGame(parent: HTMLElement): Phaser.Game {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, MenuScene, GameScene, GameOverScene],
+    scene: [BootScene, MenuScene, GameScene, PauseScene, GameOverScene],
   });
 }
