@@ -31,6 +31,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(ball: Ball, playerX: number): void {
+    // The scene can transition mid-frame (e.g. quitting to menu) and destroy this
+    // sprite's or the ball's physics body before its own update loop stops calling us.
+    if (!this.body || !ball.body) {
+      return;
+    }
     this.chase(ball);
     this.tryReturn(ball, playerX);
   }

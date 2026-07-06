@@ -111,6 +111,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(): void {
+    // A scene transition (e.g. quitting to menu) can destroy this scene's physics
+    // objects mid-frame while one more update tick is still in flight; bail out rather
+    // than touch destroyed bodies.
+    if (!this.ball?.body) {
+      return;
+    }
     this.player.update();
     this.player2?.update();
     this.enemy?.update(this.ball, this.player.x);

@@ -44,8 +44,8 @@ export class MenuScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true });
       text.on(Phaser.Input.Events.GAMEOBJECT_POINTER_OVER, () => text.setColor("#ffff88"));
       text.on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => text.setColor("#ffffff"));
-      text.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => this.startGame(option.mode));
-      this.input.keyboard?.on(option.key, () => this.startGame(option.mode));
+      text.once(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => this.startGame(option.mode));
+      this.input.keyboard?.once(option.key, () => this.startGame(option.mode));
     });
 
     this.add

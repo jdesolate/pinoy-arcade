@@ -72,6 +72,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(): void {
+    // The scene can transition mid-frame (e.g. quitting to menu) and destroy this
+    // sprite's physics body before its own update loop stops calling us.
+    if (!this.body) {
+      return;
+    }
     const left = this.leftKeys.some((k) => k.isDown) || this.touchState.left;
     const right = this.rightKeys.some((k) => k.isDown) || this.touchState.right;
     const jump = this.upKeys.some((k) => k.isDown) || this.touchState.jump;
